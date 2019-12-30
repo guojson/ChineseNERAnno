@@ -209,6 +209,6 @@ def val():
         print("".join(word), tag)
 
 if __name__ == '__main__':
-    # train()
-    val()
+    train()
+    # val()
 

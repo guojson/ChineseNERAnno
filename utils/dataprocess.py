@@ -32,11 +32,13 @@ def _parse_anno(path,save_path):
                                 ann=gen_labels(id)
                                 if character !='<' and first_tag:
                                     w.write(character+'\t'+'B-'+ann+'\n')
+                                    first_tag = False
                                 elif character !='<' and not first_tag:
                                     w.write(character + '\t' + 'I-' + ann+'\n')
-                                    first_tag=False
+
                                 else:
                                     tags.append('<')
+                                    first_tag = True
                             elif len(tags)>=4 and ''.join(tags[-2:])=='/e':
                                 if character=='>':
                                     tags.clear()
@@ -65,9 +67,9 @@ def _parse_data(path,save_path):
 
 
 if __name__ == '__main__':
-    # path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train'
-    # save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.train'
-    # _parse_anno(path,save_path)
-    path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.test'
-    save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.text'
-    _parse_data(path, save_path)
+    path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test'
+    save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.test'
+    _parse_anno(path,save_path)
+    # path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.test'
+    # save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.text'
+    # _parse_data(path, save_path)

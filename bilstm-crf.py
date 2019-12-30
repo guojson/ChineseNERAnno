@@ -110,6 +110,10 @@ def train():
     # 加载测试集
     test_datas, test_labels = read_corpus(test_data_path, vocab2idx, label2idx)
 
+    train_datas_v2=train_datas.copy()
+    test_datas_v2=test_datas.copy()
+
+
     # In[3]:
 
     print(train_datas[5])
@@ -164,12 +168,50 @@ def train():
     print(model.metrics_names)
     print(score)
 
-    with open('bilstm-crf.txt', 'wb') as file_pi:
-        pickle.dump(history.history, file_pi)
-    # save model
-    model.save("./model/bilstm_crf_model.h5")
+    # with open('bilstm-crf.txt', 'wb') as file_pi:
+    #     pickle.dump(history.history, file_pi)
+    # # save model
+    # model.save("./model/bilstm_crf_model.h5")
+    #
+    # y_pred = model.predict(test_datas)
+    #
+    # y_label = np.argmax(y_pred, axis=-1)
+    # y_label_v2 = y_label.reshape(1, -1)[0]
+    #
+    # y_true = np.argmax(test_labels, axis=-1)
+    # y_true = y_true.reshape(1, -1)[0]
+    # print(metrics.classification_report(y_true, y_label_v2, labels=list(label2idx.values()),
+    #                                     target_names=list(label2idx.keys()), digits=4))
+    #
+    # with open('bilstm-crf-ner-test.txt','w',encoding='utf-8') as f:
+    #     for idx in range(len(test_datas_v2)):
+    #         data=test_datas_v2[idx]
+    #         sent_chars=[idx2vocab[idx] for idx in data]
+    #         y_ner = [idx2label[i] for i in y_label[idx]][-len(sent_chars):]
+    #         result_words = get_valid_nertag(sent_chars, y_ner)
+    #         for (word, tag) in result_words:
+    #             print("".join(word), tag)
+    #             f.write("".join(word)+'\t'+tag+'\n')
+#------------------------
+        # y_pred = model.predict(train_datas)
+        #
+        # y_label = np.argmax(y_pred, axis=-1)
+        # y_label = y_label.reshape(1, -1)[0]
+        #
+        # y_true = np.argmax(train_labels, axis=-1)
+        # y_true = y_true.reshape(1, -1)[0]
+        #
+        # for data in train_datas:
+        #     sent_chars=[idx2vocab[idx] for idx in data]
+        #     y_ner = [idx2label[i] for i in y_label][-len(sent_chars):]
+        #     result_words = get_valid_nertag(sent_chars, y_ner)
+        #     for (word, tag) in result_words:
+        #         print("".join(word), tag)
+        #         f.write("".join(word)+'\t'+tag+'\n')
 
-def val():
+
+
+def val(file_path,save_path):
 
     char_vocab_path = "./data/char_vocabs.txt" # 字典文件
     model_path = "./model/bilstm_crf_model.h5" # 模型文件
@@ -184,31 +226,42 @@ def val():
     vocab2idx = {char: idx for idx, char in idx2vocab.items()}
 
     idx2label = {idx: label for label, idx in label2idx.items()}
+    with open(file_path,'r',encoding='utf-8') as f:
 
-    sentence = "1.稻津采用日本曹达株式会社研制的专利配方､加拿大龙灯集团先进的加工工艺加工而成的双内吸传导型水稻杀菌剂｡具有双内吸传导功能和防病､增产多重功效,不仅能防治水稻稻瘟病,还能兼治水稻生长期､穗期的其他病害,保护水稻的茎秆和功能叶片,增强光合作用,提高水稻产量和品质｡稻津的成分及含量:70%是"
-    sent_chars=list(sentence)
-    sent2id = [vocab2idx[word] if word in vocab2idx else vocab2idx['<UNK>'] for word in sent_chars]
+        sentences=f.readlines()
+        for sentence in sentences:
 
-    sent2input = np.array([[0] * (MAX_LEN-len(sent2id)) + sent2id[:MAX_LEN]])
+            sent_chars=list(sentence)
+            print(sentence)
+            with open(save_path,'a+',encoding='utf-8') as f2:
+                for sent_char in sent_chars:
+                    f2.write(sent_char)
+                f2.write('\n')
+                sent2id = [vocab2idx[word] if word in vocab2idx else vocab2idx['<UNK>'] for word in sent_chars]
 
-    model = load_model(model_path, custom_objects={'CRF': CRF}, compile=False)
-    y_pred = model.predict(sent2input)
+                sent2input = np.array([[0] * (MAX_LEN-len(sent2id)) + sent2id[:MAX_LEN]])
 
-    y_label = np.argmax(y_pred, axis=2)
-    y_label = y_label.reshape(1, -1)[0]
-    y_ner = [idx2label[i] for i in y_label][-len(sent_chars):]
+                model = load_model(model_path, custom_objects={'CRF': CRF}, compile=False)
+                y_pred = model.predict(sent2input)
 
-    print(idx2label)
-    print(sent_chars)
-    print(sent2id)
-    print(y_ner)
+                y_label = np.argmax(y_pred, axis=2)
+                y_label = y_label.reshape(1, -1)[0]
+                y_ner = [idx2label[i] for i in y_label][-len(sent_chars):]
 
-    # 对预测结果进行命名实体解析和提取
-    result_words = get_valid_nertag(sent_chars, y_ner)
-    for (word, tag) in result_words:
-        print("".join(word), tag)
+                print(idx2label)
+                print(sent_chars)
+                print(sent2id)
+                print(y_ner)
+
+                # 对预测结果进行命名实体解析和提取
+                result_words = get_valid_nertag(sent_chars, y_ner)
+                for (word, tag) in result_words:
+                    print("".join(word), tag)
+                    f2.write("".join(word) + '\t' + tag + '\n')
 
 if __name__ == '__main__':
-    train()
-    # val()
+    file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.txt'
+    save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-train.txt'
+    # train()
+    val(file_path,save_path)
 

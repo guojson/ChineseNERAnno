@@ -53,7 +53,21 @@ def _parse_anno(path,save_path):
     except Exception as e:
         print("出现异常\n"+e)
 
+def _parse_data(path,save_path):
+    with open(save_path,'w',encoding='UTF-8') as f1:
+        with open(path,'r',encoding='UTF-8') as f2:
+            lines=f2.readlines()
+            for line in lines:
+                if line!='\n':
+                    f1.write(line.strip().split('\t')[0])
+                else:
+                    f1.write('\n')
+
+
 if __name__ == '__main__':
-    path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train'
-    save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.train'
-    _parse_anno(path,save_path)
+    # path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train'
+    # save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.train'
+    # _parse_anno(path,save_path)
+    path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.test'
+    save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.text'
+    _parse_data(path, save_path)

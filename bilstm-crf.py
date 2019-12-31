@@ -16,7 +16,7 @@ from keras_contrib.metrics import crf_viterbi_accuracy
 from keras import backend as K
 from keras_self_attention import  SeqSelfAttention
 import  pickle
-
+from utils.conlleval import evaluate
 from keras.models import load_model
 import numpy as np
 char_vocab_path = "./data/char_vocabs.txt" # 字典文件
@@ -168,6 +168,19 @@ def train():
     print(model.metrics_names)
     print(score)
 
+    y_pred = model.predict(test_datas)
+    y_label = np.argmax(y_pred, axis=-1)
+    y_labels = y_label.reshape(1, -1)[0]
+    pre_tags= [idx2label[idx]  for idx in y_labels]
+
+    ture_label = np.argmax(test_labels, axis=-1)
+    true_labels = ture_label.reshape(1, -1)[0]
+    true_tags = [idx2label[idx] for idx in true_labels]
+
+    evaluate(true_tags,pre_tags,verbose=True)
+
+
+
     # with open('bilstm-crf.txt', 'wb') as file_pi:
     #     pickle.dump(history.history, file_pi)
     # # save model
@@ -262,9 +275,9 @@ def val(file_path,file_label_path, save_path):
                         f2.write("".join(word) + '\t' + tag + '\n')
 
 if __name__ == '__main__':
-    file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.txt'
-    file_label_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.train'
-    save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-train.txt'
-    # train()
-    val(file_path,file_label_path, save_path)
+    # file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.txt'
+    # file_label_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test'
+    # save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-test.txt'
+    train()
+    # val(file_path,file_label_path, save_path)
 

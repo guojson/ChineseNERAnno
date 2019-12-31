@@ -211,7 +211,7 @@ def train():
 
 
 
-def val(file_path,save_path):
+def val(file_path,file_label_path, save_path):
 
     char_vocab_path = "./data/char_vocabs.txt" # 字典文件
     model_path = "./model/bilstm_crf_model.h5" # 模型文件
@@ -226,42 +226,45 @@ def val(file_path,save_path):
     vocab2idx = {char: idx for idx, char in idx2vocab.items()}
 
     idx2label = {idx: label for label, idx in label2idx.items()}
+    model = load_model(model_path, custom_objects={'CRF': CRF}, compile=False)
     with open(file_path,'r',encoding='utf-8') as f:
+        sentences = f.readlines()
+        with open(file_label_path,'r',encoding='utf-8') as f3:
+            lable_sentence=f3.readlines()
+            for idx in range(len(sentences)):
+                sentence=sentences[idx]
+                sent_chars=list(sentence)
+                print(sentence)
+                lab_sen_chars=list(lable_sentence[idx])
 
-        sentences=f.readlines()
-        for sentence in sentences:
 
-            sent_chars=list(sentence)
-            print(sentence)
-            with open(save_path,'a+',encoding='utf-8') as f2:
-                for sent_char in sent_chars:
-                    f2.write(sent_char)
-                f2.write('\n')
-                sent2id = [vocab2idx[word] if word in vocab2idx else vocab2idx['<UNK>'] for word in sent_chars]
+                with open(save_path,'a+',encoding='utf-8') as f2:
+                    for sent_char in lab_sen_chars:
+                        f2.write(sent_char)
+                    f2.write('\n')
+                    sent2id = [vocab2idx[word] if word in vocab2idx else vocab2idx['<UNK>'] for word in sent_chars]
 
-                sent2input = np.array([[0] * (MAX_LEN-len(sent2id)) + sent2id[:MAX_LEN]])
+                    sent2input = np.array([[0] * (MAX_LEN-len(sent2id)) + sent2id[:MAX_LEN]])
+                    y_pred = model.predict(sent2input)
+                    y_label = np.argmax(y_pred, axis=2)
+                    y_label = y_label.reshape(1, -1)[0]
+                    y_ner = [idx2label[i] for i in y_label][-len(sent_chars):]
 
-                model = load_model(model_path, custom_objects={'CRF': CRF}, compile=False)
-                y_pred = model.predict(sent2input)
+                    print(idx2label)
+                    print(sent_chars)
+                    print(sent2id)
+                    print(y_ner)
 
-                y_label = np.argmax(y_pred, axis=2)
-                y_label = y_label.reshape(1, -1)[0]
-                y_ner = [idx2label[i] for i in y_label][-len(sent_chars):]
-
-                print(idx2label)
-                print(sent_chars)
-                print(sent2id)
-                print(y_ner)
-
-                # 对预测结果进行命名实体解析和提取
-                result_words = get_valid_nertag(sent_chars, y_ner)
-                for (word, tag) in result_words:
-                    print("".join(word), tag)
-                    f2.write("".join(word) + '\t' + tag + '\n')
+                    # 对预测结果进行命名实体解析和提取
+                    result_words = get_valid_nertag(sent_chars, y_ner)
+                    for (word, tag) in result_words:
+                        print("".join(word), tag)
+                        f2.write("".join(word) + '\t' + tag + '\n')
 
 if __name__ == '__main__':
     file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.txt'
+    file_label_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.train'
     save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-train.txt'
     # train()
-    val(file_path,save_path)
+    val(file_path,file_label_path, save_path)
 

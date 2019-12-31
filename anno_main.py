@@ -452,7 +452,7 @@ class MainFrame(Frame):
         print(self.tages)
         # print(self.labelEntryList)
 
-
+        self.savetext()
 
 
 

@@ -181,10 +181,10 @@ def train():
 
 
 
-    # with open('bilstm-crf.txt', 'wb') as file_pi:
-    #     pickle.dump(history.history, file_pi)
-    # # save model
-    # model.save("./model/bilstm_crf_model.h5")
+    with open('bilstm-crf.txt', 'wb') as file_pi:
+        pickle.dump(history.history, file_pi)
+    # save model
+    model.save("./model/bilstm_crf_model.h5")
     #
     # y_pred = model.predict(test_datas)
     #

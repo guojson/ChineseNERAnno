@@ -485,7 +485,6 @@ class MainFrame(Frame):
         # print(entityList)
         # pos=self.text.search(prefixRe, currentRow+'.0',currentIndex,regexp=True)
         # print(pos)
-
     def delete(self):
         self.text.edit_separator()
         text_index = self.text.index(INSERT)

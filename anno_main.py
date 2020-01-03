@@ -493,8 +493,7 @@ class MainFrame(Frame):
     def onAnnotion(self,index):
         if self.debug:
             print("Action Track: textReturnEnter")
-        if len(self.word_position)==0:
-            return
+
         try:
             self.text.edit_separator()
             category=self.pressCommand[index]
@@ -577,6 +576,15 @@ class MainFrame(Frame):
             print(start)
             print(end)
             segtex=self.text.get(start,end)
+
+            #
+            # sentence=list(segtex)
+            # data=[]
+            # for chara in sentence:
+
+
+
+
             if len(segtex)!=0:
                 self.cursorName.config(text=segtex)
                 if segtex not in self.labelEntryList[str(index)]:

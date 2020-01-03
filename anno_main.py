@@ -394,11 +394,8 @@ class MainFrame(Frame):
         if replacer.strip()=='':
             return
         self.text.edit_separator()
-
         _pos=self.text.index(INSERT)
-
         _pos=_pos.split('.')[0]
-
         countVar = StringVar()
         self.text.mark_set("matchStart",_pos+'.0')
         self.text.mark_set("matchEnd", _pos+'.0')

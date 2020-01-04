@@ -168,17 +168,19 @@ class MainFrame(Frame):
         # self.text.bind('<Control-Key-y>', self.preToHistory)
         self.text.bind('<Control-Key-s>', self.savetext)
         self.note = Label(self, text="选中: ", foreground="Blue", font=(self.textFontStyle, 10, "bold"))
-        self.note.grid(row=self.textRow, column=0, sticky=W)
+        self.note.grid(row=self.textRow, column=0, padx=12, sticky=W)
 
         self.cursorName = Label(self, foreground="Blue", font=(self.textFontStyle, 10, "bold"))
-        self.cursorName.grid(row=self.textRow, column=1, columnspan=self.textColumn-1, sticky=W)
+        self.cursorName.grid(row=self.textRow, column=1, columnspan=2, sticky=W)
 
         self.note2 = Label(self, text="缓存实体: ", foreground="Blue", font=(self.textFontStyle, 10, "bold"))
-        self.note2.grid(row=self.textRow, column=2, sticky=W)
+        self.note2.grid(row=self.textRow, column=3, sticky=W)
 
         self.cursorName2 = Label(self, foreground="Blue", font=(self.textFontStyle, 10, "bold"))
-        self.cursorName2.grid(row=self.textRow, column=3, columnspan=self.textColumn - 1, sticky=W)
+        self.cursorName2.grid(row=self.textRow, column=4, columnspan=2, sticky=W)
 
+        self.note3 = Label(self, text="已完成: ", foreground="Blue", font=(self.textFontStyle, 10, "bold"))
+        self.note3.grid(row=self.textRow, column=6, sticky=W)
 
         self.cursorIndex = Label(self, text=("row: %s\ncol: %s" % (0, 0)), foreground="red",
                                  font=(self.textFontStyle, 10, "bold"))

@@ -97,7 +97,7 @@ def _parse_entity(path,save_path):
                             entity.append(character)
                         else:
                             tags.append('<')
-                            data.append([''.join(entity.copy()),ann,dec])
+                            data.append([''.join(entity.copy()),ann,dec,str(id),count])
                             entity.clear()
                     elif len(tags)>=4 and ''.join(tags[-2:])=='/e':
                         if character=='>':
@@ -115,8 +115,8 @@ def _parse_entity(path,save_path):
 
 
 if __name__ == '__main__':
-    path=r'D:\学习资料\知识图谱\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
-    save_path=r'D:\学习资料\知识图谱\ChineseNERAnno\data\train_data_entity.csv'
+    path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
+    save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data_entity.csv'
     # _parse_anno(path,save_path)
     # path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.test'
     # save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.text'

@@ -197,12 +197,12 @@ class MainFrame(Frame):
             self.buttons.append(button)
 
         self.findtext = Entry(self)
-        self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, pady=4)
+        self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, padx=10)
         self.findtext.delete(0, "end")
         self.findtext.insert(0, "查找文本...")
 
         self.replacetext = Entry(self,)
-        self.replacetext.grid(row=index_row + 6, column=self.textColumn + 1, columnspan=2, sticky=E+W, pady=4)
+        self.replacetext.grid(row=index_row + 6, column=self.textColumn + 1, columnspan=2, sticky=E+W,padx=10)
         self.replacetext.delete(0, "end")
         self.replacetext.insert(0, "替代文本...")
         #替换按钮

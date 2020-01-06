@@ -1,23 +1,32 @@
 import csv
 
 from utils.SQLiteTools import ConnectSqlite
-
+from sklearn.model_selection import train_test_split
 con = ConnectSqlite()
 def gen_labels(id):
     sql = 'SELECT * FROM category where id='+str(id)+';'
     catogory =con.fetchall_table(sql)
     return str(catogory[0][1]),str(catogory[0][3])
 
+#动态划分，并生成train,test文件
+def _train_test_split(file_path,test_size):
+    try:
+        with open(file_path,'r',encoding='utf-8') as f:
+            lines=f.readlines()
+            trains_x,tests_x=train_test_split(lines,test_size=test_size, shuffle=True)
+            _parse_anno(trains_x,file_path + '.train')
+            _parse_anno(tests_x, file_path + '.test')
+            print("生成成功!")
+    except Exception as e:
+        print("出现异常\n"+e)
+
 #将<e0>ABC</e0>转换为
 # A B-LOC
-# B-I-LOC
-# C-I-LOC
-def _parse_anno(path,save_path):
+# B I-LOC
+# C I-LOC
+def _parse_anno(sentences,save_path):
     try:
         with open(save_path,'w',encoding='utf-8') as w:
-            with open(path,'r',encoding='utf-8') as f:
-                sentences=f.readlines()
-                data=[]
                 for count,sentence in enumerate(sentences):
                     tags=[]
                     category=[]
@@ -114,11 +123,22 @@ def _parse_entity(path,save_path):
             f_csv.writerows(data)
 
 
+
+
 if __name__ == '__main__':
+    #--------------------------------生成实体
     path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
     save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data_entity.csv'
+    _parse_entity(path, save_path)
+
+    # path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
+    # save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.txt'
     # _parse_anno(path,save_path)
     # path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data.test'
     # save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.text'
     # _parse_data(path, save_path)
-    _parse_entity(path,save_path)
+    # file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
+    # _train_test_split(file_path,test_size=0.1)
+    # myList = ['青海省', '内蒙古自治区', '西藏自治区', '新疆维吾尔自治区', '广西壮族自治区']
+    # myList.sort(key=lambda i: len(i), reverse=True)
+    # print(myList)

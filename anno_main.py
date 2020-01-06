@@ -341,7 +341,8 @@ class MainFrame(Frame):
         self.text.mark_set("matchEnd", self.label_position + ".0")
         self.text.mark_set("searchLimit",END)
 
-        entityPa = '[^(+>)]' + self.labelEntry + '[^(+</)]'
+        # entityPa = '[^(+>)]' + self.labelEntry + '[^(+</)]'
+        entityPa='(?<=[<e[0-9]+>).*?'+self.labedEntry+'.*?(?=[</e[0-9]+>)'
         # print(entityPa)
         index = 0
         while True:
@@ -352,10 +353,8 @@ class MainFrame(Frame):
             self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
             index1 = pos.split('.')[0]
             index2 = pos.split('.')[1]
-
             first_pos = index1 + '.' + str(int(index2) + 1)
             last_pos = "%s + %sc" % (pos, str(int(countVar.get()) - 1))
-
             segtex = self.text.get(first_pos, last_pos)
             # print(segtex)
             self.text.delete(first_pos, last_pos)

@@ -20,8 +20,8 @@ from utils.conlleval import evaluate
 from keras.models import load_model
 import numpy as np
 char_vocab_path = "./data/char_vocabs.txt" # 字典文件
-train_data_path = "./data/train_data.train" # 训练数据
-test_data_path = "./data/train_data.test" # 测试数据
+train_data_path = "./data/水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train" # 训练数据
+test_data_path = "./data/水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test" # 测试数据
 
 special_words = ['<PAD>', '<UNK>'] # 特殊词表示 #<PAD>:对于短句子用<PAD>填充，<EOS>代表结尾；<UNK>代表未知词汇;<GO>代表decode第一个输入，即解码的开始
 # "BIO"标记的标签

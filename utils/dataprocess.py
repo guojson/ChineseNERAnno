@@ -105,6 +105,9 @@ def _parse_entity(path,save_path):
                         if character != '<':
                             entity.append(character)
                         else:
+                            if sentence[index:index+2]=='<e':
+                                print(count)
+                                continue
                             tags.append('<')
                             data.append([''.join(entity.copy()),ann,dec,str(id),count])
                             entity.clear()

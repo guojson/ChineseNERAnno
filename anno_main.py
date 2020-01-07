@@ -208,9 +208,21 @@ class MainFrame(Frame):
         #替换按钮
         replacebtn = Button(self,height=1, text="替换", command=self.replace_anno)
         replacebtn.grid(sticky=E+W, pady=5, padx=10, row=index_row+7, column=self.textColumn + 1, columnspan=2)
-        #全局标注
-        self.global_recognition()
 
+        self.row_number = Entry(self, )
+        self.row_number.grid(row=index_row + 8, column=self.textColumn + 1, sticky=E + W, padx=10)
+        self.row_number.delete(0, "end")
+        self.row_number.insert(0, "1")
+
+        # 替换按钮
+        row_btn = Button(self, height=1, text="定位", command=self.line_pos)
+        row_btn.grid(sticky=E + W, pady=5, padx=10, row=index_row + 8, column=self.textColumn + 2)
+
+    def line_pos(self):
+
+        row_num = self.row_number.get()
+        self.text.see(row_num+'.0')
+        self.text.mark_set('insert', row_num+'.0')
 
     #菜单事件
     def menu_event(self,submenu):
@@ -341,8 +353,8 @@ class MainFrame(Frame):
         self.text.mark_set("matchEnd", self.label_position + ".0")
         self.text.mark_set("searchLimit",END)
 
-        # entityPa = '[^(+>)]' + self.labelEntry + '[^(+</)]'
-        entityPa='(?<=[<e[0-9]+>).*?'+self.labedEntry+'.*?(?=[</e[0-9]+>)'
+        entityPa = '[^(+>)]' + self.labelEntry + '[^(+</)]'
+        # entityPa='(?<=[<e[0-9]+>).*?'+self.labedEntry+'.*?(?=[</e[0-9]+>)'
         # print(entityPa)
         index = 0
         while True:

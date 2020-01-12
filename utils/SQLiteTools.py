@@ -174,12 +174,15 @@ class conTest:
 
 
 if __name__ == '__main__':
-    contest = conTest()
-    # contest.create_table_test()
-    # contest.insert_table_test_many()
-    contest.fetchall_table_test()
-    # contest.insert_table_test_one()
+    # contest = conTest()
+    # # contest.create_table_test()
+    # # contest.insert_table_test_many()
     # contest.fetchall_table_test()
-    # contest.update_table_test()
-    # contest.drop_table_test()
-    contest.close_con()
+    # # contest.insert_table_test_one()
+    # # contest.fetchall_table_test()
+    # # contest.update_table_test()
+    # # contest.drop_table_test()
+    # contest.close_con()
+    con = ConnectSqlite(r"D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\configs\corpus_info.db")
+    data=con.fetchall_table("select * from entitys where name='张三';")
+    print(data)

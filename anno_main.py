@@ -1,15 +1,20 @@
+import csv
 import json
 import math
 import os
 import platform
 from collections import deque
+
 from tkinter import *
 import tkinter.font as tkFont
 from tkinter import filedialog
 import sqlite3
+import tkinter as tk
+
+from sklearn.model_selection import train_test_split
 
 from utils.SQLiteTools import ConnectSqlite
-
+from utils.CSegments import CSegment
 
 class MainFrame(Frame):
     def __init__(self, parent):
@@ -83,7 +88,7 @@ class MainFrame(Frame):
             fmenu.add_command(label=item,command=lambda arg=item: self.menu_event(arg))
 
         emenu = Menu(menubar)
-        for item in ['复制', '粘贴', '剪切']:
+        for item in ['检测', '分割','转为实体', '转为纯文本','自动识别']:
             emenu.add_command(label=item,command=lambda arg=item: self.menu_event(arg))
 
         vmenu = Menu(menubar)
@@ -110,7 +115,7 @@ class MainFrame(Frame):
         for idx in range(0, 16):
             self.rowconfigure(idx, weight=1)
 
-        self.lbl = Label(self, text="File: no file is opened")
+        self.lbl = Label(self, text="no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
 
         self.fnt = tkFont.Font(family='Times', size=20, weight="bold", underline=0)
@@ -185,6 +190,9 @@ class MainFrame(Frame):
         self.cursorIndex = Label(self, text=("row: %s\ncol: %s" % (0, 0)), foreground="red",
                                  font=(self.textFontStyle, 10, "bold"))
         self.cursorIndex.grid(row=self.textRow, column=self.textColumn + 1, pady=4)
+        self.state = Label(self, text="正在检测\n 0 条", foreground="red",
+                                 font=(self.textFontStyle, 10, "bold"))
+        self.state.grid(row=self.textRow, column=self.textColumn +2, pady=4)
         self.buttons=[]
         for inx,category in enumerate(self.pressCommand):
             index_row = math.floor(int(inx) / 2)
@@ -195,7 +203,6 @@ class MainFrame(Frame):
             self.tages[str(inx)]=[]
             self.labelEntryList[str(inx)]=[]
             self.buttons.append(button)
-
         self.findtext = Entry(self)
         self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, padx=10)
         self.findtext.delete(0, "end")
@@ -224,11 +231,215 @@ class MainFrame(Frame):
         self.text.see(row_num+'.0')
         self.text.mark_set('insert', row_num+'.0')
 
+    def gen_labels(self,id):
+
+        sql = 'SELECT * FROM category where id=' + str(id) + ';'
+        catogory = self.con.fetchall_table(sql)
+        return str(catogory[0][1]), str(catogory[0][3])
+
+    # 动态划分，并生成train,test文件
+    def _train_test_split(self,file_path, test_size):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                trains_x, tests_x = train_test_split(lines, test_size=test_size, shuffle=True)
+                self._parse_anno(trains_x, file_path + '.train')
+                self._parse_anno(tests_x, file_path + '.test')
+                print("生成成功!")
+        except Exception as e:
+            print("出现异常\n" + e)
+
+    # 将<e0>ABC</e0>转换为
+    # A B-LOC
+    # B I-LOC
+    # C I-LOC
+    def _parse_anno(self,sentences, save_path):
+        try:
+            with open(save_path, 'w', encoding='utf-8') as w:
+                for count, sentence in enumerate(sentences):
+                    tags = []
+                    category = []
+                    first_tag = True
+                    for index, character in enumerate(list(sentence.strip())):
+                        # print(str(index)+'\t'+character+'\n')
+                        if len(character.strip()) == 0:
+                            continue
+                        if len(tags) != 0:
+                            if ''.join(tags[-2:]) == '<e':
+                                if character != '>':
+                                    category.append(character)
+                                else:
+                                    tags.append(character)
+                            elif len(tags) == 3:
+                                id = int(''.join(category))
+                                _, ann = self.gen_labels(id)
+                                if character != '<' and first_tag:
+                                    w.write(character + '\t' + 'B-' + ann + '\n')
+                                    first_tag = False
+                                elif character != '<' and not first_tag:
+                                    w.write(character + '\t' + 'I-' + ann + '\n')
+
+                                else:
+                                    tags.append('<')
+                                    first_tag = True
+                            elif len(tags) >= 4 and ''.join(tags[-2:]) == '/e':
+                                if character == '>':
+                                    tags.clear()
+                                    category.clear()
+                            else:
+                                tags.append(character)
+                        else:
+                            if character == '<' and sentence[index + 1] == 'e':
+                                tags.append(character)
+                            else:
+                                w.write(character + '\t' + 'O' + '\n')
+                    w.write('\n')
+                    index += 1
+        except Exception as e:
+            print("出现异常\n" + e)
+
+    # 转换为纯文本，无标签
+    def _parse_data(self,path, save_path):
+        with open(save_path, 'w', encoding='UTF-8') as f1:
+            with open(path, 'r', encoding='UTF-8') as f2:
+                lines = f2.readlines()
+                for line in lines:
+                    if line != '\n':
+                        f1.write(line.strip().split('\t')[0])
+                    else:
+                        f1.write('\n')
+
+    # 将标记文本<e0>ABC</e0>转换为ABC 0
+    def _parse_entity(self,path, save_path):
+        with open(path, 'r', encoding='utf-8') as f:
+            sentences = f.readlines()
+            data = []
+            for count, sentence in enumerate(sentences):
+                tags = []
+                category = []
+                first_tag = True
+                entity = []
+                for index, character in enumerate(list(sentence.strip())):
+                    # print(str(index)+'\t'+character+'\n')
+                    if len(character.strip()) == 0:
+                        continue
+                    if len(tags) != 0:
+                        if ''.join(tags[-2:]) == '<e':
+                            if character != '>':
+                                category.append(character)
+                            else:
+                                tags.append(character)
+                        elif len(tags) == 3:
+                            id = int(''.join(category))
+                            dec, ann = self.gen_labels(id)
+                            if character != '<':
+                                entity.append(character)
+                            else:
+                                if sentence[index:index + 2] == '<e':
+                                    print(count)
+                                    continue
+                                tags.append('<')
+                                data.append([''.join(entity.copy()), ann, dec, str(id), count])
+                                entity.clear()
+                        elif len(tags) >= 4 and ''.join(tags[-2:]) == '/e':
+                            if character == '>':
+                                tags.clear()
+                                category.clear()
+                        else:
+                            tags.append(character)
+                    else:
+                        if character == '<' and sentence[index + 1] == 'e':
+                            tags.append(character)
+                index += 1
+            with open(save_path, 'w', encoding='utf-8')as f:
+                f_csv = csv.writer(f)
+                f_csv.writerows(data)
+
+    def _parse_train_test_entity(self,file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        with open(file_path + '.train_test_entity', 'w', encoding='utf-8') as f2:
+            for index, line in enumerate(lines):
+                [entity, t_label, p_label] = line.strip().split('\t')
+                if t_label == 'O' and p_label != 'O':
+                    print(entity, t_label, p_label)
+                    f2.write(str(index) + '\t' + entity + '\t' + t_label + '\t' + p_label + '\n')
+
+                elif t_label != 'O' and p_label == 'O':
+                    print(entity, t_label, p_label)
+                    f2.write(str(index) + '\t' + entity + '\t' + t_label + '\t' + p_label + '\n')
+                elif t_label != p_label:
+                    print(entity, t_label, p_label)
+                    f2.write(str(index) + '\t' + entity + '\t' + t_label + '\t' + p_label + '\n')
+
     #菜单事件
     def menu_event(self,submenu):
         if submenu=="打开":
             self.onOpen()
+        elif submenu=="检测":
+            self.check_file()
+        elif submenu=="分割":
+            file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
+            self._train_test_split(file_path,test_size=0.1)
 
+        elif submenu=="转为实体":
+            path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
+            save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data_entity.csv'
+            self._parse_entity(path, save_path)
+
+        elif submenu=="转为纯文本":
+            path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train'
+            save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test.train'
+            self._parse_data(path, save_path)
+        elif submenu == "自动识别":
+            inputDialog = MyDialog(self)
+            self.wait_window(inputDialog)  # 这一句很重要！！！
+            return
+
+    def check_file(self):
+
+        path= self.lbl.cget('text')
+        with open(path, 'r', encoding='utf-8') as f:
+            sentences = f.readlines()
+            data = []
+            for count, sentence in enumerate(sentences):
+                self.state.config(text="正在检测\n"+str(count)+"条")
+                tags = []
+                category = []
+                first_tag = True
+                entity = []
+                for index, character in enumerate(list(sentence.strip())):
+                    # print(str(index)+'\t'+character+'\n')
+                    if len(character.strip()) == 0:
+                        continue
+                    if len(tags) != 0:
+                        if ''.join(tags[-2:]) == '<e':
+                            if character != '>':
+                                category.append(character)
+                            else:
+                                tags.append(character)
+                        elif len(tags) == 3:
+                            id = int(''.join(category))
+                            # dec, ann = gen_labels(id)
+                            if character != '<':
+                                entity.append(character)
+                            else:
+                                if sentence[index:index + 2] == '<e':
+                                    print(count)
+                                    continue
+                                tags.append('<')
+                                # data.append([''.join(entity.copy()), ann, dec, str(id), count])
+                                entity.clear()
+                        elif len(tags) >= 4 and ''.join(tags[-2:]) == '/e':
+                            if character == '>':
+                                tags.clear()
+                                category.clear()
+                        else:
+                            tags.append(character)
+                    else:
+                        if character == '<' and sentence[index + 1] == 'e':
+                            tags.append(character)
+                index += 1
      #读取类别配置信息
     def readcategory(self):
         # if os.path.isfile(self.configFile):
@@ -392,11 +603,7 @@ class MainFrame(Frame):
             for pos_ in positoins:
                 if index%2==0:
                     print(pos_,positoins[index+1])
-
-
-
                 index+=1
-
     #替换函数
     def replace_anno(self):
 
@@ -666,7 +873,7 @@ class MainFrame(Frame):
             self.text.delete("1.0",END)
             text = self.readFile(fl)
             self.text.insert(END, text)
-            self.setNameLabel("File: " + fl)
+            self.setNameLabel(fl)
             self.autoLoadNewFile(self.fileName, "1.0")
             # self.setDisplay()
             # self.initAnnotate()
@@ -866,7 +1073,7 @@ class MainFrame(Frame):
             self.text.delete("1.0", END)
             text = self.readFile(fileName)
             self.text.insert("end-1c", text)
-            self.setNameLabel("File: " + fileName)
+            self.setNameLabel(fileName)
             self.text.mark_set(INSERT, newcursor_index)
             self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
@@ -912,6 +1119,123 @@ class MainFrame(Frame):
 
             self.text.tag_add('tag' + entityList[0], first_pos, last_pos)
             self.text.tag_config('tag' + entityList[0], background=self.pressCommand[int(entityList[0])]['color'])
+
+
+# 弹窗
+class MyDialog(tk.Toplevel):
+    def __init__(self,parent):
+        super().__init__()
+        self.title('操作面板')
+        self.parent = parent # 显式地保留父窗口
+        self.wm_attributes('-topmost', 1)
+        # self.pack(fill=BOTH, expand=True)
+        # 弹窗界面
+        self.setup_UI()
+        self.userinfo=[]
+        self.current_cursor='0'
+        dic_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\train_data_entity.xls'
+    def setup_UI(self):
+        # 第一行（两列）
+
+
+        #
+        # row1 = tk.Frame(self)
+        # row1.pack(fill="x")
+        # tk.Label(row1, text='姓名：', width=8).pack(side=tk.LEFT)
+        # self.name = tk.StringVar()
+        # tk.Entry(row1, textvariable=self.name, width=20).pack(side=tk.LEFT)
+        #
+        # # 第二行
+        # row1 = tk.Frame(self)
+        # row1.pack(fill="x")
+        # tk.Button(row1, text="下一条", command=self.cancel).pack(side=tk.RIGHT)
+        # tk.Button(row1, text="排除", command=self.ok).pack(side=tk.RIGHT)
+        # tk.Button(row1, text="修正", command=self.ok).pack(side=tk.RIGHT)
+        # tk.Button(row1, text="添加", command=self.ok).pack(side=tk.RIGHT)
+
+        self.nextbtn = Button(self, width=10,  height=1, text="下一条", command=self.next_cursor)
+        self.nextbtn.grid(sticky=W+E, pady=5, padx=10, row=1, column=1)
+        self.addbtn = Button(self, width=10, height=1, text="添加", command=self.addtext)
+        self.addbtn.grid(sticky=W+E, pady=5, padx=10, row=1, column=2)
+
+        self.eliminatebtn = Button(self, width=10, height=1, text="排除", command=self.remove_entity)
+        self.eliminatebtn.grid(sticky=W+E, pady=5, padx=10, row=1, column=3)
+        self.update = Button(self, width=10, height=1, text="修正", command=self.ok)
+        self.update.grid(sticky=W+E, pady=5, padx=10, row=1, column=4)
+
+        # 第三行
+        # 第三行con
+        self.cancelbtn=Button(self, width=10, height=1,text="取消", command=self.cancel).grid(sticky=E, pady=5, padx=10, row=3, column=2)
+        self.okbtn=Button(self, width=10, height=1, text="确定", command=self.ok).grid(sticky=E, pady=5, padx=10, row=3, column=3)
+    def ok(self):
+        self.userinfo = [self.name.get(), self.age.get()]  # 设置数据
+
+        self.parent.cursorName.config(text='segtex')
+        self.destroy()  # 销毁窗口
+
+    def cancel(self):
+        self.userinfo = None  # 空！
+        self.destroy()
+
+    def remove_entity(self):
+        remove_entity= self.parent.cursorName["text"]
+        print(remove_entity)
+        try:
+            if self.parent.con.fetchall_table("select * from entitys where name='" + remove_entity + "';", True) == -1:
+                self.parent.con.insert_table_many("insert into entitys(name, deleted) VALUES (?,?)",[(remove_entity,3)])
+                self.parent.cursorName.config(text='添加成功!')
+        except Exception as e :
+            print(e)
+
+
+    def next_cursor(self):
+        self.parent.text.edit_separator()
+        text_index = self.parent.text.index(INSERT)
+        _pos = text_index.split('.')
+        if self.current_cursor=='0':
+            self.current_cursor = _pos[0]
+        else:
+            self.current_cursor = str(int(_pos[0]) + 1)
+        # self.parent.text.see(str(row_num)+'.0')
+        # self.parent.text.mark_set('insert', str(row_num)+'.0')
+
+        max_len=39
+        text_content = self.parent.text.get(self.current_cursor+".0", self.current_cursor+".end")
+        print(text_content)
+        mcut=CSegment()
+        mcut.read_user_dict_from_database(self.parent.con)
+        mcut.MM(text_content, max_len, True)
+        MM_result = mcut.get_result()
+
+        MM_result.reverse()
+        for data in MM_result:
+            start=str(data[0][0])
+            end=str(data[0][1])
+            self.parent.text.delete(self.current_cursor+'.'+start, self.current_cursor+'.'+end)
+            relace_text='<e'+str(data[2])+'>'+data[1]+'</e'+str(data[2])+'>'
+
+            last_len=self.current_cursor+'.'+str(int(start)+len(relace_text))
+
+            self.parent.text.insert(self.current_cursor+'.'+start,'<e'+str(data[2])+'>'+data[1]+'</e'+str(data[2])+'>' )
+
+            self.parent.text.tag_add('tag' + str(data[2]), self.current_cursor+'.'+start, last_len)
+            self.parent.text.tag_config('tag' +str(data[2]), background=self.parent.pressCommand[data[2]]['color'])
+        self.parent.text.see(self.current_cursor + '.0')
+        self.parent.text.mark_set('insert', self.current_cursor + '.0')
+    def addtext(self):
+        new_entity=self.parent.labelEntry
+        new_entity_tag=self.parent.label_cate
+        try:
+            if self.parent.con.fetchall_table("select * from entitys where name='"+new_entity+"';",True)==-1:
+                # if self.parent.con.fetchall_table("select * from entitys where name='"+new_entity+"'")!=-1:
+                sql='insert into entitys(name, category_id, row_i, deleted) VALUES (?,?,?,?)'
+                self.parent.con.insert_table_many(sql,[(new_entity,new_entity_tag,self.current_cursor,0)])
+                mcut=CSegment()
+                mcut.read_user_dict_from_database(self.parent.con)
+                self.parent.cursorName.config(text='添加成功!')
+        except Exception as e:
+            print(e)
+
 
 if __name__ == '__main__':
     print("SUTDAnnotator launched!")

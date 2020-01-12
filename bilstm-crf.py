@@ -14,14 +14,14 @@ from keras_contrib.layers import CRF
 from keras_contrib.losses import crf_loss
 from keras_contrib.metrics import crf_viterbi_accuracy
 from keras import backend as K
-from keras_self_attention import  SeqSelfAttention
+# from keras_self_attention import  SeqSelfAttention
 import  pickle
 from utils.conlleval import evaluate
 from keras.models import load_model
 import numpy as np
 char_vocab_path = "./data/char_vocabs.txt" # 字典文件
-train_data_path = "./data/水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train" # 训练数据
-test_data_path = "./data/水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test" # 测试数据
+train_data_path = r"D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train" # 训练数据
+test_data_path = r"D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test" # 测试数据
 
 special_words = ['<PAD>', '<UNK>'] # 特殊词表示 #<PAD>:对于短句子用<PAD>填充，<EOS>代表结尾；<UNK>代表未知词汇;<GO>代表decode第一个输入，即解码的开始
 # "BIO"标记的标签
@@ -55,11 +55,11 @@ char_vocabs = special_words + char_vocabs
 # 字符和索引编号对应
 idx2vocab = {idx: char for idx, char in enumerate(char_vocabs)}
 vocab2idx = {char: idx for idx, char in idx2vocab.items()}
-EPOCHS =30
+EPOCHS =15
 BATCH_SIZE = 64
 EMBED_DIM = 300
 HIDDEN_SIZE = 64
-MAX_LEN = 500
+MAX_LEN = 1000
 
 # In[2]:
 
@@ -156,7 +156,7 @@ def train():
 
     tensorboard_cb = TensorBoard(
         log_dir='./logs',
-        histogram_freq=1,
+        # histogram_freq=1,
         write_graph=True,
         write_images=True
     )
@@ -240,19 +240,37 @@ def val(file_path,file_label_path, save_path):
 
     idx2label = {idx: label for label, idx in label2idx.items()}
     model = load_model(model_path, custom_objects={'CRF': CRF}, compile=False)
+    pre_labels=[]
+    cha_ners=[]
+    ture_lables=[]
     with open(file_path,'r',encoding='utf-8') as f:
         sentences = f.readlines()
         with open(file_label_path,'r',encoding='utf-8') as f3:
             lable_sentence=f3.readlines()
+            cha_ner=[]
+            ture_lable=[]
+
+            for labels in lable_sentence:
+                if labels!='\n':
+                    cha,cat=labels.strip().split('\t')
+                    cha_ners.append(cha)
+                    ture_lables.append(cat)
+                    # cha_ner.append(cha)
+                    # ture_lable.append(cat)
+                # else:
+                #     cha_ners.append(cha_ner.copy())
+                #     ture_lables.append(ture_lable.copy())
+                #     cha_ner.clear()
+                #     ture_lable.clear()
+
             for idx in range(len(sentences)):
-                sentence=sentences[idx]
+                sentence=sentences[idx].strip()
                 sent_chars=list(sentence)
-                print(sentence)
+                # print(sentence)
                 lab_sen_chars=list(lable_sentence[idx])
 
-
                 with open(save_path,'a+',encoding='utf-8') as f2:
-                    for sent_char in lab_sen_chars:
+                    for sent_char in sent_chars:
                         f2.write(sent_char)
                     f2.write('\n')
                     sent2id = [vocab2idx[word] if word in vocab2idx else vocab2idx['<UNK>'] for word in sent_chars]
@@ -266,7 +284,17 @@ def val(file_path,file_label_path, save_path):
                     print(idx2label)
                     print(sent_chars)
                     print(sent2id)
+
                     print(y_ner)
+                    pre_labels.extend(y_ner)
+
+                    # if not len(cha_ners[idx])==len(sentence)==len(y_ner):
+                    #     print('-------------------------------------------------')
+                    #     print(idx+1,len(cha_ners[idx]),len(sentence),len(y_ner))
+                    #     print(''.join(cha_ners[idx]))
+                    #     print(sentence)
+                    #     print(len(y_ner))
+
 
                     # 对预测结果进行命名实体解析和提取
                     result_words = get_valid_nertag(sent_chars, y_ner)
@@ -274,10 +302,28 @@ def val(file_path,file_label_path, save_path):
                         print("".join(word), tag)
                         f2.write("".join(word) + '\t' + tag + '\n')
 
+    with open(save_path+'.list','w',encoding='utf-8') as f4:
+        for i in range(len(cha_ners)):
+            # f4.write(cha_ners[i] + '\t' + ture_lables[i] + '\t' + pre_labels[i] + '\n')
+            if ture_lables[i]=='O' and pre_labels[i]!='O':
+                # print(entity,t_label,p_label)
+                f4.write(cha_ners[i] + '\t' + ture_lables[i] + '\t' + pre_labels[i] + '\t'+'0'+'\n')
+                # f2.write(str(index)+'\t'+entity+'\t'+t_label+'\t'+p_label+'\n')
+
+            elif ture_lables[i]!='O' and pre_labels[i]=='O':
+                # print(entity, t_label, p_label)
+                f4.write(cha_ners[i] + '\t' + ture_lables[i] + '\t' + pre_labels[i] + '\t'+'0'+'\n')
+            elif ture_lables[i]!=pre_labels[i]:
+                # print(entity, t_label, p_label)
+                f4.write(cha_ners[i] + '\t' + ture_lables[i] + '\t' + pre_labels[i] + '\t'+'0'+'\n')
+            else:
+                f4.write(cha_ners[i] + '\t' + ture_lables[i] + '\t' + pre_labels[i] + '\t'+'1'+'\n')
+
 if __name__ == '__main__':
-    # file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\test_data.txt'
-    # file_label_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.test'
-    # save_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-test.txt'
+
     train()
+    # file_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train.data'
+    # file_label_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train'
+    # save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-train-5000.txt'
     # val(file_path,file_label_path, save_path)
 

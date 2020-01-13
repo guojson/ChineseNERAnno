@@ -1180,12 +1180,8 @@ class MyDialog(tk.Toplevel):
             self.parent.labelEntryList[str(inx)] = []
             self.parent.buttons.append(button)
 
-
-
-
-
     def ok(self):
-        if self.debug:
+        if self.parent.debug:
             print("Action Track: setColorDisplay")
         if self.parent.labelEntry=='':
             return

@@ -1165,17 +1165,110 @@ class MyDialog(tk.Toplevel):
 
         # 第三行
         # 第三行con
-        self.cancelbtn=Button(self, width=10, height=1,text="取消", command=self.cancel).grid(sticky=E, pady=5, padx=10, row=3, column=2)
-        self.okbtn=Button(self, width=10, height=1, text="确定", command=self.ok).grid(sticky=E, pady=5, padx=10, row=3, column=3)
-    def ok(self):
-        self.userinfo = [self.name.get(), self.age.get()]  # 设置数据
+        self.cancelbtn=Button(self, width=10, height=1,text="去除", command=self.cancel).grid(sticky=E, pady=5, padx=10, row=2, column=2)
+        self.okbtn=Button(self, width=10, height=1, text="局部识别", command=self.ok).grid(sticky=E, pady=5, padx=10, row=2, column=3)
 
-        self.parent.cursorName.config(text='segtex')
-        self.destroy()  # 销毁窗口
+        for inx, category in enumerate(self.parent.pressCommand):
+            index_row = math.floor(int(inx) / 4)
+            index_column = int(inx) % 4
+            print(index_row)
+            button = Button(self, width=10, height=1, text=str(category['id']) + '：' + category['des'],
+                            bg=category['color'], command=lambda arg=int(inx): self.parent.onAnnotion(arg)).grid(
+                row=index_row + 3,
+                column=index_column + 1)
+            self.parent.tages[str(inx)] = []
+            self.parent.labelEntryList[str(inx)] = []
+            self.parent.buttons.append(button)
+
+
+
+
+
+    def ok(self):
+        if self.debug:
+            print("Action Track: setColorDisplay")
+        if self.parent.labelEntry=='':
+            return
+
+        self.parent.text.edit_separator()
+
+        countVar = StringVar()
+        # entityRe = '<e[0-9]+>[^(<e|</e)]+</e[0-9]+>'
+        # compile_name = re.compile(entityRe, re.M)
+        # entityList=compile_name.findall(self.text.get('1.0',END))
+
+        self.parent.text.mark_set("matchStart", self.parent.label_position+".0")
+        self.parent.text.mark_set("matchEnd", self.parent.label_position+".0")
+        self.parent.text.mark_set("searchLimit", self.parent.label_position+'.end')
+
+        entityPa='[^(+>)]'+self.parent.labelEntry+'[^(+</)]'
+        # print(entityPa)
+        index = 0
+        while True:
+            pos = self.parent.text.search(entityPa, "matchEnd", "searchLimit", count=countVar, regexp=True)
+            if pos == "":
+                break
+            self.parent.text.mark_set("matchStart", pos)
+            self.parent.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+            index1=pos.split('.')[0]
+            index2=pos.split('.')[1]
+
+            first_pos = index1+'.'+str(int(index2)+1)
+            last_pos = "%s + %sc" % (pos, str(int(countVar.get())-1))
+
+
+            segtex = self.parent.text.get(first_pos, last_pos)
+            # print(segtex)
+            self.parent.text.delete(first_pos,last_pos)
+            self.parent.text.insert(first_pos, self.parent.labedEntry)
+
+
+            entityRe = '[0-9]+'
+            compile_name = re.compile(entityRe, re.M)
+            entityList = compile_name.findall(self.parent.labedEntry)
+
+            last_pos = "%s + %sc" % (first_pos, str(len(self.parent.labedEntry)))
+            self.parent.text.tag_add('tag' + entityList[0], first_pos, last_pos)
+            self.parent.text.tag_config('tag' + entityList[0], background=self.parent.pressCommand[int(entityList[0])]['color'])
+
 
     def cancel(self):
-        self.userinfo = None  # 空！
-        self.destroy()
+        self.parent.text.edit_separator()
+        print('测试')
+        currentIndex = self.parent.text.index(INSERT)
+        print(currentIndex)
+        currentRow = currentIndex.split('.')[0]
+        currentColumn = currentIndex.split('.')[1]
+        count = 0
+        pre_pos = 0
+        while True:
+            suf_pos = int(currentColumn) - count
+            count = count + 1
+            pre_pos = int(currentColumn) - count
+            if self.parent.text.get(currentRow + '.' + str(pre_pos), currentRow + '.' + str(suf_pos)) == '<':
+                break
+        selected_pre__pos = currentRow + '.' + str(pre_pos)
+        print(selected_pre__pos)
+        end_pos = 0
+        count = 0
+        while True:
+            pre_pos = int(currentColumn) + count
+            count = count + 1
+            end_pos = int(currentColumn) + count
+
+            if self.parent.text.get(currentRow + '.' + str(pre_pos), currentRow + '.' + str(end_pos)) == '>':
+                break
+        selected_end_pos = currentRow + '.' + str(end_pos)
+        print(selected_end_pos)
+        segtex = self.parent.text.get(selected_pre__pos, selected_end_pos)
+        # print(segtex)
+        print(segtex.split('</e')[0])
+        end_len = len(segtex) - len(segtex.split('</e')[0])
+        print(end_len)
+        self.parent.text.delete(selected_pre__pos, selected_end_pos)
+        self.parent.text.insert(selected_pre__pos, segtex[(end_len - 1):(-end_len)])
+
+
 
     def remove_entity(self):
         remove_entity= self.parent.cursorName["text"]

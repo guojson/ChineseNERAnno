@@ -88,7 +88,7 @@ class MainFrame(Frame):
             fmenu.add_command(label=item,command=lambda arg=item: self.menu_event(arg))
 
         emenu = Menu(menubar)
-        for item in ['检测', '分割','转为实体', '转为纯文本','自动识别','定位']:
+        for item in ['检测', '分割','转为实体', '转为纯文本','自动识别','定位','查找和替换']:
             emenu.add_command(label=item,command=lambda arg=item: self.menu_event(arg))
 
         vmenu = Menu(menubar)
@@ -203,27 +203,27 @@ class MainFrame(Frame):
             self.tages[str(inx)]=[]
             self.labelEntryList[str(inx)]=[]
             self.buttons.append(button)
-        self.findtext = Entry(self)
-        self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, padx=10)
-        self.findtext.delete(0, "end")
-        self.findtext.insert(0, "查找文本...")
-
-        self.replacetext = Entry(self,)
-        self.replacetext.grid(row=index_row + 6, column=self.textColumn + 1, columnspan=2, sticky=E+W,padx=10)
-        self.replacetext.delete(0, "end")
-        self.replacetext.insert(0, "替代文本...")
-        #替换按钮
-        replacebtn = Button(self,height=1, text="替换", command=self.replace_anno)
-        replacebtn.grid(sticky=E+W, pady=5, padx=10, row=index_row+7, column=self.textColumn + 1, columnspan=2)
-
-        self.row_number = Entry(self, )
-        self.row_number.grid(row=index_row + 8, column=self.textColumn + 1, sticky=E + W, padx=10)
-        self.row_number.delete(0, "end")
-        self.row_number.insert(0, "1")
-
-        # 替换按钮
-        row_btn = Button(self, height=1, text="定位", command=self.line_pos)
-        row_btn.grid(sticky=E + W, pady=5, padx=10, row=index_row + 8, column=self.textColumn + 2)
+        # self.findtext = Entry(self)
+        # self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, padx=10)
+        # self.findtext.delete(0, "end")
+        # self.findtext.insert(0, "查找文本...")
+        #
+        # self.replacetext = Entry(self,)
+        # self.replacetext.grid(row=index_row + 6, column=self.textColumn + 1, columnspan=2, sticky=E+W,padx=10)
+        # self.replacetext.delete(0, "end")
+        # self.replacetext.insert(0, "替代文本...")
+        # #替换按钮
+        # replacebtn = Button(self,height=1, text="替换", command=self.replace_anno)
+        # replacebtn.grid(sticky=E+W, pady=5, padx=10, row=index_row+7, column=self.textColumn + 1, columnspan=2)
+        #
+        # self.row_number = Entry(self, )
+        # self.row_number.grid(row=index_row + 8, column=self.textColumn + 1, sticky=E + W, padx=10)
+        # self.row_number.delete(0, "end")
+        # self.row_number.insert(0, "1")
+        #
+        # # 替换按钮
+        # row_btn = Button(self, height=1, text="定位", command=self.line_pos)
+        # row_btn.grid(sticky=E + W, pady=5, padx=10, row=index_row + 8, column=self.textColumn + 2)
 
     def line_pos(self):
 
@@ -398,6 +398,9 @@ class MainFrame(Frame):
 
             locationDialog=LocatDialog(self)
             self.wait_window(locationDialog)
+        elif submenu=="查找和替换":
+            replaceDialog=ReplaceDialog(self)
+            self.wait_window(replaceDialog)
 
 
     def check_file(self):
@@ -1176,7 +1179,7 @@ class MyDialog(tk.Toplevel):
             button = Button(self, width=10, height=1, text=str(category['id']) + '：' + category['des'],
                             bg=category['color'], command=lambda arg=int(inx): self.parent.onAnnotion(arg)).grid(
                 row=index_row + 3,
-                column=index_column + 1)
+                column=index_column + 1,padx=10,pady=10)
             self.parent.tages[str(inx)] = []
             self.parent.labelEntryList[str(inx)] = []
             self.parent.buttons.append(button)
@@ -1345,6 +1348,41 @@ class LocatDialog(tk.Toplevel):
         row_num = self.location.get()
         self.parent.text.see(row_num + '.0')
         self.parent.text.mark_set('insert', row_num + '.0')
+
+class ReplaceDialog(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__()
+        self.title('查找和替换')
+        self.parent = parent  # 显式地保留父窗口
+        self.wm_attributes('-topmost', 1)
+        # self.pack(fill=BOTH, expand=True)
+        # 弹窗界面
+        # tk.Label(self, text="行数：").grid(row=0)
+        # self.location = tk.Entry(self,)
+        # self.location.grid(row=0, column=1, padx=10, pady=5)
+        # tk.Button(self, text="定位", width=10, command=self.locate).grid(row=1, column=0,  padx=10, pady=5, columnspan=2)
+
+        tk.Label(self, text="查找：").grid(row=0)
+        self.findtext = Entry(self)
+        self.findtext.grid(row=0, column=1, columnspan=2, sticky=E + W, padx=10, pady=10)
+        self.findtext.delete(0, "end")
+        self.findtext.insert(0, "查找文本...")
+
+        tk.Label(self, text="替换：").grid(row=1)
+        self.replacetext = Entry(self, )
+        self.replacetext.grid(row=1, column=1, columnspan=2, sticky=E + W, padx=10,pady=10)
+        self.replacetext.delete(0, "end")
+        self.replacetext.insert(0, "替代文本...")
+        # 替换按钮
+        replacebtn = Button(self, height=1, text="替换", command=self.replace_anno)
+        replacebtn.grid(sticky=E + W, pady=5, padx=10, row=2, column=0, columnspan=3)
+
+    def replace_anno(self):
+
+        row_num = self.location.get()
+        self.parent.text.see(row_num + '.0')
+        self.parent.text.mark_set('insert', row_num + '.0')
+
 
 
 if __name__ == '__main__':

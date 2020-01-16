@@ -1337,8 +1337,14 @@ class LocatDialog(tk.Toplevel):
         # self.pack(fill=BOTH, expand=True)
         # 弹窗界面
         tk.Label(self, text="行数：").grid(row=0)
-        self.location = tk.Entry(self).grid(row=0, column=1, padx=10, pady=5)
-        tk.Button(self, text="定位", width=10).grid(row=1, column=0,  padx=10, pady=5, columnspan=2)
+        self.location = tk.Entry(self,)
+        self.location.grid(row=0, column=1, padx=10, pady=5)
+        tk.Button(self, text="定位", width=10, command=self.locate).grid(row=1, column=0,  padx=10, pady=5, columnspan=2)
+    def locate(self):
+
+        row_num = self.location.get()
+        self.parent.text.see(row_num + '.0')
+        self.parent.text.mark_set('insert', row_num + '.0')
 
 
 if __name__ == '__main__':

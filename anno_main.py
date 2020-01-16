@@ -88,7 +88,7 @@ class MainFrame(Frame):
             fmenu.add_command(label=item,command=lambda arg=item: self.menu_event(arg))
 
         emenu = Menu(menubar)
-        for item in ['检测', '分割','转为实体', '转为纯文本','自动识别']:
+        for item in ['检测', '分割','转为实体', '转为纯文本','自动识别','定位']:
             emenu.add_command(label=item,command=lambda arg=item: self.menu_event(arg))
 
         vmenu = Menu(menubar)
@@ -394,7 +394,11 @@ class MainFrame(Frame):
         elif submenu == "自动识别":
             inputDialog = MyDialog(self)
             self.wait_window(inputDialog)  # 这一句很重要！！！
-            return
+        elif submenu == "定位":
+
+            locationDialog=LocatDialog(self)
+            self.wait_window(locationDialog)
+
 
     def check_file(self):
 
@@ -801,9 +805,6 @@ class MainFrame(Frame):
             # sentence=list(segtex)
             # data=[]
             # for chara in sentence:
-
-
-
 
             if len(segtex)!=0:
                 self.cursorName.config(text=segtex)
@@ -1238,6 +1239,8 @@ class MyDialog(tk.Toplevel):
         count = 0
         pre_pos = 0
         while True:
+            if count>=60:
+                break
             suf_pos = int(currentColumn) - count
             count = count + 1
             pre_pos = int(currentColumn) - count
@@ -1248,6 +1251,8 @@ class MyDialog(tk.Toplevel):
         end_pos = 0
         count = 0
         while True:
+            if count >= 60:
+                break
             pre_pos = int(currentColumn) + count
             count = count + 1
             end_pos = int(currentColumn) + count
@@ -1263,8 +1268,6 @@ class MyDialog(tk.Toplevel):
         print(end_len)
         self.parent.text.delete(selected_pre__pos, selected_end_pos)
         self.parent.text.insert(selected_pre__pos, segtex[(end_len - 1):(-end_len)])
-
-
 
     def remove_entity(self):
         remove_entity= self.parent.cursorName["text"]
@@ -1324,6 +1327,18 @@ class MyDialog(tk.Toplevel):
                 self.parent.cursorName.config(text='添加成功!')
         except Exception as e:
             print(e)
+
+class LocatDialog(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__()
+        self.title('定位')
+        self.parent = parent  # 显式地保留父窗口
+        self.wm_attributes('-topmost', 1)
+        # self.pack(fill=BOTH, expand=True)
+        # 弹窗界面
+        tk.Label(self, text="行数：").grid(row=0)
+        self.location = tk.Entry(self).grid(row=0, column=1, padx=10, pady=5)
+        tk.Button(self, text="定位", width=10).grid(row=1, column=0,  padx=10, pady=5, columnspan=2)
 
 
 if __name__ == '__main__':

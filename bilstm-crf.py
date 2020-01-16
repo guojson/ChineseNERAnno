@@ -18,6 +18,7 @@ from keras import backend as K
 import  pickle
 from utils.conlleval import evaluate
 from keras.models import load_model
+import matplotlib.pyplot as plt
 import numpy as np
 char_vocab_path = "./data/char_vocabs.txt" # 字典文件
 train_data_path = r"D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train" # 训练数据
@@ -321,9 +322,37 @@ def val(file_path,file_label_path, save_path):
 
 if __name__ == '__main__':
 
-    train()
+    # train()
     # file_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train.data'
     # file_label_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann.train'
     # save_path = r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf-ner-train-5000.txt'
     # val(file_path,file_label_path, save_path)
+    data_dir=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\bilstm-crf.txt'
+    g = open(data_dir, 'rb')
+    data = pickle.load(g)
+    print(data)
 
+    names = range(0, 15)
+    names = [str(x) for x in list(names)]
+
+    x = range(len(names))
+    y_train =data['val_loss']
+    y_test = data['val_crf_viterbi_accuracy']
+    # plt.plot(x, y, 'ro-')
+    # plt.plot(x, y1, 'bo-')
+    # pl.xlim(-1, 11)  # 限定横轴的范围
+    # pl.ylim(-1, 110)  # 限定纵轴的范围
+
+    # plt.plot(x, y_train, marker='o', mec='r', mfc='w', label='val_loss')
+    plt.plot(x, y_test, marker='*', ms=10, label='val_crf_viterbi_accuracy')
+    # plt.legend()  # 让图例生效
+    plt.xticks(    x, names, rotation = 1)
+
+    plt.margins(0)
+    plt.subplots_adjust(bottom=0.10)
+    plt.xlabel('EPOCHS')  # X轴标签
+    plt.ylabel("Accuracy")  # Y轴标签
+    # plt.yticks([0.750, 0.800, 0.850])
+    # plt.title("A simple plot") #标题
+    plt.show()
+    # plt.savefig('D:\\f1.jpg', dpi=900)

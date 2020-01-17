@@ -1,4 +1,5 @@
 import csv
+import datetime
 import json
 import math
 import os
@@ -1277,7 +1278,8 @@ class MyDialog(tk.Toplevel):
         print(remove_entity)
         try:
             if self.parent.con.fetchall_table("select * from entitys where name='" + remove_entity + "';", True) == -1:
-                self.parent.con.insert_table_many("insert into entitys(name, deleted) VALUES (?,?)",[(remove_entity,3)])
+                timestamp= datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.parent.con.insert_table_many("insert into entitys(name, deleted, timestamp) VALUES (?,?,?)",[(remove_entity,3,timestamp)])
                 self.parent.cursorName.config(text='添加成功!')
         except Exception as e :
             print(e)
@@ -1323,8 +1325,9 @@ class MyDialog(tk.Toplevel):
         try:
             if self.parent.con.fetchall_table("select * from entitys where name='"+new_entity+"';",True)==-1:
                 # if self.parent.con.fetchall_table("select * from entitys where name='"+new_entity+"'")!=-1:
-                sql='insert into entitys(name, category_id, row_i, deleted) VALUES (?,?,?,?)'
-                self.parent.con.insert_table_many(sql,[(new_entity,new_entity_tag,self.current_cursor,0)])
+                timestamp= datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                sql='insert into entitys(name, category_id, row_i, deleted,timestamp) VALUES (?,?,?,?,?)'
+                self.parent.con.insert_table_many(sql,[(new_entity,new_entity_tag,self.current_cursor,0,timestamp)])
                 mcut=CSegment()
                 mcut.read_user_dict_from_database(self.parent.con)
                 self.parent.cursorName.config(text='添加成功!')

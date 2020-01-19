@@ -17,6 +17,23 @@ from sklearn.model_selection import train_test_split
 from utils.SQLiteTools import ConnectSqlite
 from utils.CSegments import CSegment
 
+
+def get_screen_size(window):
+    return window.winfo_screenwidth(), window.winfo_screenheight()
+
+
+def get_window_size(window):
+    return window.winfo_reqwidth(), window.winfo_reqheight()
+
+
+def center_window(root, width, height):
+    screenwidth = root.winfo_screenwidth()
+    screenheight = root.winfo_screenheight()
+    size = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
+    print(size)
+    root.geometry(size)
+
+
 class MainFrame(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
@@ -51,7 +68,7 @@ class MainFrame(Frame):
             self.textRow = len(self.pressCommand)
         else:
             self.textRow = 20
-        self.textColumn =8
+        self.textColumn =16
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence
         self.keepRecommend = True
@@ -119,38 +136,38 @@ class MainFrame(Frame):
         self.lbl = Label(self, text="no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
 
-        self.fnt = tkFont.Font(family='Times', size=20, weight="bold", underline=0)
+        self.fnt = tkFont.Font(family='Times', size=18, weight="bold", underline=0)
 
         self.text = Text(self, font=self.fnt,autoseparators=False, selectbackground='light salmon',undo=True)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow-1, padx=12, sticky=E + W + S + N)
         self.sb = Scrollbar(self)
-        self.sb.grid(row=1, column=self.textColumn, rowspan=self.textRow, padx=0, sticky=E + W + S + N)
+        self.sb.grid(row=1, column=self.textColumn, rowspan=self.textRow-1, padx=0, sticky=E + W + S + N)
         self.text['yscrollcommand'] = self.sb.set
         self.sb['command'] = self.text.yview
 
-        self.undobtn=Button(self,width=10, height=1,text="撤销", command=self.backToHistory)
-        self.undobtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 1)
+        # self.undobtn=Button(self,width=10, height=1,text="撤销", command=self.backToHistory)
+        # self.undobtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 1)
+        #
+        # redobtn = Button(self, width=10, height=1, text="恢复", command=self.preToHistory)
+        # redobtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 2)
+        #
+        # savebtn = Button(self, width=10, height=1, text="保存", command=self.savetext)
+        # savebtn.grid(sticky=E, pady=5, padx=10, row=1, column=self.textColumn + 1)
 
-        redobtn = Button(self, width=10, height=1, text="恢复", command=self.preToHistory)
-        redobtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 2)
+        # yongli=Button(self, width=10, height=1, text="去除", command=self.ceshi)
+        # yongli.grid(sticky=E, pady=5, padx=10, row=1, column=self.textColumn + 2)
 
-        savebtn = Button(self, width=10, height=1, text="保存", command=self.savetext)
-        savebtn.grid(sticky=E, pady=5, padx=10, row=1, column=self.textColumn + 1)
+        # delbtn = Button(self, width=10, height=1, text="删除", command=self.delete)
+        # delbtn.grid(sticky=E, pady=5, padx=10, row=2, column=self.textColumn +1)
 
-        yongli=Button(self, width=10, height=1, text="去除", command=self.ceshi)
-        yongli.grid(sticky=E, pady=5, padx=10, row=1, column=self.textColumn + 2)
+        # recbtn = Button(self, width=10, height=1, text="局部识别", command=self.recognition)
+        # recbtn.grid(sticky=E, pady=5, padx=10, row=2, column=self.textColumn + 2)
 
-        delbtn = Button(self, width=10, height=1, text="删除", command=self.delete)
-        delbtn.grid(sticky=E, pady=5, padx=10, row=2, column=self.textColumn +1)
+        # globtn = Button(self, width=10, height=1, text="全局识别", command=self.global_recognition)
+        # globtn.grid(sticky=E, pady=5, padx=10, row=3, column=self.textColumn + 1)
 
-        recbtn = Button(self, width=10, height=1, text="局部识别", command=self.recognition)
-        recbtn.grid(sticky=E, pady=5, padx=10, row=2, column=self.textColumn + 2)
-
-        globtn = Button(self, width=10, height=1, text="全局识别", command=self.global_recognition)
-        globtn.grid(sticky=E, pady=5, padx=10, row=3, column=self.textColumn + 1)
-
-        globtn = Button(self, width=10, height=1, text="全局标记", command=self.global_anno)
-        globtn.grid(sticky=E, pady=5, padx=10, row=3, column=self.textColumn + 2)
+        # globtn = Button(self, width=10, height=1, text="全局标记", command=self.global_anno)
+        # globtn.grid(sticky=E, pady=5, padx=10, row=3, column=self.textColumn + 2)
 
         # abtn = Button(self,width=10, height=1,text="打开", command=self.onOpen)
         # abtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 1)
@@ -188,22 +205,21 @@ class MainFrame(Frame):
         self.note3 = Label(self, text="已完成: ", foreground="Blue", font=(self.textFontStyle, 10, "bold"))
         self.note3.grid(row=self.textRow, column=6, sticky=W)
 
-        self.cursorIndex = Label(self, text=("row: %s\ncol: %s" % (0, 0)), foreground="red",
+        self.cursorIndex = Label(self, text=("row: %s col: %s" % (0, 0)), foreground="red",font=(self.textFontStyle, 10, "bold"))
+        self.cursorIndex.grid(row=self.textRow, column=7, pady=4, columnspan=3)
+        self.state = Label(self, text="正在检测 0 条", foreground="red",
                                  font=(self.textFontStyle, 10, "bold"))
-        self.cursorIndex.grid(row=self.textRow, column=self.textColumn + 1, pady=4)
-        self.state = Label(self, text="正在检测\n 0 条", foreground="red",
-                                 font=(self.textFontStyle, 10, "bold"))
-        self.state.grid(row=self.textRow, column=self.textColumn +2, pady=4)
+        self.state.grid(row=self.textRow, column=10, columnspan=3 , pady=4)
         self.buttons=[]
-        for inx,category in enumerate(self.pressCommand):
-            index_row = math.floor(int(inx) / 2)
-            index_column = int(inx) % 2
-            print(index_row)
-            button=Button(self, width=10, height=1, text=str(category['id'])+'：'+category['des'], bg=category['color'], command=lambda arg=int(inx): self.onAnnotion(arg)).grid(row=index_row+4,
-                                                                                                      column=self.textColumn + index_column+1)
-            self.tages[str(inx)]=[]
-            self.labelEntryList[str(inx)]=[]
-            self.buttons.append(button)
+        # for inx,category in enumerate(self.pressCommand):
+        #     index_row = math.floor(int(inx) / 2)
+        #     index_column = int(inx) % 2
+        #     print(index_row)
+        #     button=Button(self, width=10, height=1, text=str(category['id'])+'：'+category['des'], bg=category['color'], command=lambda arg=int(inx): self.onAnnotion(arg)).grid(row=index_row+4,
+        #                                                                                               column=self.textColumn + index_column+1)
+        #     self.tages[str(inx)]=[]
+        #     self.labelEntryList[str(inx)]=[]
+        #     self.buttons.append(button)
         # self.findtext = Entry(self)
         # self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, padx=10)
         # self.findtext.delete(0, "end")
@@ -402,6 +418,12 @@ class MainFrame(Frame):
         elif submenu=="查找和替换":
             replaceDialog=ReplaceDialog(self)
             self.wait_window(replaceDialog)
+        elif submenu=="保存":
+            self.savetext()
+        elif submenu=="撤销":
+            self.backToHistory()
+        elif submenu=="恢复":
+            self.preToHistory()
 
 
     def check_file(self):
@@ -601,7 +623,7 @@ class MainFrame(Frame):
             index+=1
         self.savetext()
         self.cursorName.config(text="成功识别"+str(index)+"条")
-    #全局标记
+    # #全局标记
     def global_anno(self):
         tags=self.text.tag_names()
         for tag in tags:
@@ -1087,7 +1109,7 @@ class MainFrame(Frame):
         if self.debug:
             print("Action Track: setCursorLabel")
         row_column = cursor_index.split('.')
-        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
+        cursor_text = ("row: %s col: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
     def setColorDisplay(self):
@@ -1165,13 +1187,26 @@ class MyDialog(tk.Toplevel):
 
         self.eliminatebtn = Button(self, width=10, height=1, text="排除", command=self.remove_entity)
         self.eliminatebtn.grid(sticky=W+E, pady=5, padx=10, row=1, column=3)
-        self.update = Button(self, width=10, height=1, text="修正", command=self.ok)
-        self.update.grid(sticky=W+E, pady=5, padx=10, row=1, column=4)
+
+        self.globtn = Button(self, width=10, height=1, text="全局识别", command=self.parent.global_recognition)
+        self.globtn.grid(sticky=E, pady=5, padx=10, row=1, column=4)
+
+        # self.update = Button(self, width=10, height=1, text="修正", command=self.ok)
+        # self.update.grid(sticky=W+E, pady=5, padx=10, row=1, column=4)
 
         # 第三行
         # 第三行con
-        self.cancelbtn=Button(self, width=10, height=1,text="去除", command=self.cancel).grid(sticky=E, pady=5, padx=10, row=2, column=2)
-        self.okbtn=Button(self, width=10, height=1, text="局部识别", command=self.ok).grid(sticky=E, pady=5, padx=10, row=2, column=3)
+        #
+        self.undobtn=Button(self,width=10, height=1,text="撤销", command=self.parent.backToHistory,bg='#FFFFFF')
+        self.undobtn.grid(sticky=E, pady=5, padx=10, row=2, column=1)
+
+        self.cancelbtn=Button(self, width=10, height=1,text="去除",bg='#FFFFFF',command=self.cancel).grid(sticky=E, pady=5, padx=10, row=2, column=2)
+        self.okbtn=Button(self, width=10, height=1, bg='#FFFFFF',text="局部识别", command=self.ok).grid(sticky=E, pady=5, padx=10, row=2, column=3)
+
+        #
+        redobtn = Button(self, bg='#FFFFFF',width=10, height=1, text="恢复", command=self.parent.preToHistory)
+        redobtn.grid(sticky=E, pady=5, padx=10, row=2, column=4)
+
 
         for inx, category in enumerate(self.parent.pressCommand):
             index_row = math.floor(int(inx) / 4)
@@ -1345,8 +1380,9 @@ class LocatDialog(tk.Toplevel):
         tk.Label(self, text="行数：").grid(row=0)
         self.location = tk.Entry(self,)
         self.location.grid(row=0, column=1, padx=10, pady=5)
+        self.location.bind("<Return>", self.locate)
         tk.Button(self, text="定位", width=10, command=self.locate).grid(row=1, column=0,  padx=10, pady=5, columnspan=2)
-    def locate(self):
+    def locate(self,event=None):
 
         row_num = self.location.get()
         self.parent.text.see(row_num + '.0')
@@ -1392,7 +1428,8 @@ if __name__ == '__main__':
     print("SUTDAnnotator launched!")
     print(("OS:%s") % (platform.system()))
     root = Tk()
-    root.geometry("1300x700+200+200")
+    # center_window(root,1300,700)
+    root.geometry("1300x700")
     app = MainFrame(root)
-    app.setFont(14)
+    app.setFont(13)
     root.mainloop()

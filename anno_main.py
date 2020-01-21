@@ -136,7 +136,7 @@ class MainFrame(Frame):
         self.lbl = Label(self, text="no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
 
-        self.fnt = tkFont.Font(family='Times', size=18, weight="bold", underline=0)
+        self.fnt = tkFont.Font(family='Times', size=20, weight="bold", underline=0)
 
         self.text = Text(self, font=self.fnt,autoseparators=False, selectbackground='light salmon',undo=True)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow-1, padx=12, sticky=E + W + S + N)

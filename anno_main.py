@@ -396,7 +396,7 @@ class MainFrame(Frame):
         elif submenu=="检测":
             self.check_file()
         elif submenu=="分割":
-            file_path=r'D:\博士期间相关资料\理论知识相关\知识图谱\知识图谱源码\ChineseNERAnno\data\水稻玉米小麦大豆大麦_shuffle_4.txt.ann'
+            file_path=self.lbl.cget('text')
             self._train_test_split(file_path,test_size=0.1)
 
         elif submenu=="转为实体":

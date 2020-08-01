@@ -32,11 +32,11 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
 ```
 # 操作流程
 ![alt](configs/process.png)
-#主窗口
+# 主窗口
 ![alt](configs/main.png)
 
 
-#控制面板
+# 控制面板
 控制面板主要用于显示预先定义的实体类别，便于实体划分。具体的实体类别可在“文件-设置”中设置，或在数据表category中设置。 \
 ![alt](configs/keyboard.png) ![alt](configs/categories.png)
 

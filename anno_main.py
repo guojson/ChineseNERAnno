@@ -53,10 +53,7 @@ class MainFrame(Frame):
         self.currentContent = deque(maxlen=1)
         self.configFile = "configs/default.config"
         self.con = ConnectSqlite("./configs/corpus_info.db")
-
         self.pressCommand =self.readcategory()
-        # self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        # self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList ={}
         self.shortcutLabelList = []
         self.configListLabel = None
@@ -155,36 +152,6 @@ class MainFrame(Frame):
         self.text['yscrollcommand'] = self.sb.set
         self.sb['command'] = self.text.yview
 
-        # self.undobtn=Button(self,width=10, height=1,text="撤销", command=self.backToHistory)
-        # self.undobtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 1)
-        #
-        # redobtn = Button(self, width=10, height=1, text="恢复", command=self.preToHistory)
-        # redobtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 2)
-        #
-        # savebtn = Button(self, width=10, height=1, text="保存", command=self.savetext)
-        # savebtn.grid(sticky=E, pady=5, padx=10, row=1, column=self.textColumn + 1)
-
-        # yongli=Button(self, width=10, height=1, text="去除", command=self.ceshi)
-        # yongli.grid(sticky=E, pady=5, padx=10, row=1, column=self.textColumn + 2)
-
-        # delbtn = Button(self, width=10, height=1, text="删除", command=self.delete)
-        # delbtn.grid(sticky=E, pady=5, padx=10, row=2, column=self.textColumn +1)
-
-        # recbtn = Button(self, width=10, height=1, text="局部识别", command=self.recognition)
-        # recbtn.grid(sticky=E, pady=5, padx=10, row=2, column=self.textColumn + 2)
-
-        # globtn = Button(self, width=10, height=1, text="全局识别", command=self.global_recognition)
-        # globtn.grid(sticky=E, pady=5, padx=10, row=3, column=self.textColumn + 1)
-
-        # globtn = Button(self, width=10, height=1, text="全局标记", command=self.global_anno)
-        # globtn.grid(sticky=E, pady=5, padx=10, row=3, column=self.textColumn + 2)
-
-        # abtn = Button(self,width=10, height=1,text="打开", command=self.onOpen)
-        # abtn.grid(sticky=E, pady=5, padx=10, row=0, column=self.textColumn + 1)
-
-        # annoButton = Button(self, width=10, height=1,text="标注",command=self.onAnnotion)
-        # annoButton.grid(row=0, column=self.textColumn +2)
-
         #禁用键盘
         self.text.bind("<Any-KeyPress>",self.anykeypress)
         self.text.bind("<KeyRelease>",self.anykeyrelease)
@@ -221,36 +188,6 @@ class MainFrame(Frame):
                                  font=(self.textFontStyle, 10, "bold"))
         self.state.grid(row=self.textRow, column=10, columnspan=3 , pady=4)
         self.buttons=[]
-        # for inx,category in enumerate(self.pressCommand):
-        #     index_row = math.floor(int(inx) / 2)
-        #     index_column = int(inx) % 2
-        #     print(index_row)
-        #     button=Button(self, width=10, height=1, text=str(category['id'])+'：'+category['des'], bg=category['color'], command=lambda arg=int(inx): self.onAnnotion(arg)).grid(row=index_row+4,
-        #                                                                                               column=self.textColumn + index_column+1)
-        #     self.tages[str(inx)]=[]
-        #     self.labelEntryList[str(inx)]=[]
-        #     self.buttons.append(button)
-        # self.findtext = Entry(self)
-        # self.findtext.grid(row=index_row+5, column=self.textColumn+1, columnspan=2, sticky=E+W, padx=10)
-        # self.findtext.delete(0, "end")
-        # self.findtext.insert(0, "查找文本...")
-        #
-        # self.replacetext = Entry(self,)
-        # self.replacetext.grid(row=index_row + 6, column=self.textColumn + 1, columnspan=2, sticky=E+W,padx=10)
-        # self.replacetext.delete(0, "end")
-        # self.replacetext.insert(0, "替代文本...")
-        # #替换按钮
-        # replacebtn = Button(self,height=1, text="替换", command=self.replace_anno)
-        # replacebtn.grid(sticky=E+W, pady=5, padx=10, row=index_row+7, column=self.textColumn + 1, columnspan=2)
-        #
-        # self.row_number = Entry(self, )
-        # self.row_number.grid(row=index_row + 8, column=self.textColumn + 1, sticky=E + W, padx=10)
-        # self.row_number.delete(0, "end")
-        # self.row_number.insert(0, "1")
-        #
-        # # 替换按钮
-        # row_btn = Button(self, height=1, text="定位", command=self.line_pos)
-        # row_btn.grid(sticky=E + W, pady=5, padx=10, row=index_row + 8, column=self.textColumn + 2)
 
     def line_pos(self):
 

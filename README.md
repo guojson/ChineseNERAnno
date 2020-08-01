@@ -53,7 +53,7 @@ python anno_main.py
 ```
 标注实体
 ```
-![alt](configs/Video_2020-08-01_165311.gif)
+![alt](configs/Video_2020-08-01_165311.gif) \
 
 ```
 选择性导出实体

@@ -1,7 +1,7 @@
 # ChineseNERAnno
 Annotation tool for Chinese named entity recognition(中文命名实体标注工具,英文通用)
 ***
-#总体架构
+# 总体架构
 ```
 |-- ChineseNERAnno          #the name of this tool
     |--configs              # the configuration files for this tool
@@ -9,7 +9,7 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
     |--utils                # 
     |--anno_main.py         # the main file for ChineseNERAnno
 ```
-#菜单
+# 菜单
 ```
 |--文件
    |--打开
@@ -30,7 +30,7 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
    |--BIOES
    |--分词
 ```
-#操作流程
+# 操作流程
 ![alt](configs/process.png)
 #主窗口
 ![alt](configs/main.png)
@@ -40,7 +40,7 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
 控制面板主要用于显示预先定义的实体类别，便于实体划分。具体的实体类别可在“文件-设置”中设置，或在数据表category中设置。 \
 ![alt](configs/keyboard.png) ![alt](configs/categories.png)
 
-#操作
+# 操作
 运行主程序
 ```
 python anno_main.py
@@ -83,10 +83,10 @@ python anno_main.py
 
 
 
-#更新
+# 更新
 在将来，我们还会继续添加实体关系标注功能。其他功能后续不断完善，请耐心等待...
 
-#参考
+# 参考
 ```
 YEDDA: https://github.com/jiesutd/YEDDA.git
 ```

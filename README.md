@@ -50,14 +50,14 @@ python anno_main.py
 '文件-->打开'
 ```
 ![alt](configs/Video_2020-08-01_163914.gif)
-```
+
 * label the entity
-```
+
 ![alt](configs/Video_2020-08-01_165311.gif)
 
-```
+
 * export the entities with BIO format
-```
+
 ![alt](configs/Video_2020-08-01_170452.gif) \
 * the example for the export dataset：
 ```

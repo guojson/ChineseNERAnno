@@ -1,7 +1,7 @@
 # ChineseNERAnno
 Annotation tool for Chinese named entity recognition(中文命名实体标注工具,英文通用)
 ***
-# 总体架构
+
 ```
 |-- ChineseNERAnno          #the name of this tool
     |--configs              # the configuration files for this tool
@@ -9,7 +9,7 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
     |--utils                # 
     |--anno_main.py         # the main file for ChineseNERAnno
 ```
-# 菜单
+# menu
 ```
 |--文件
    |--打开
@@ -30,13 +30,13 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
    |--BIOES
    |--分词
 ```
-# 操作流程
+# operation process
 ![alt](configs/process.png)
-# 主窗口
+# main windows
 ![alt](configs/main.png)
 
 
-# 控制面板
+# keyboard
 控制面板主要用于显示预先定义的实体类别，便于实体划分。具体的实体类别可在“文件-设置”中设置，或在数据表category中设置。 \
 ![alt](configs/keyboard.png) ![alt](configs/categories.png)
 

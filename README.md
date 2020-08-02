@@ -40,26 +40,26 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
 控制面板主要用于显示预先定义的实体类别，便于实体划分。具体的实体类别可在“文件-设置”中设置，或在数据表category中设置。 \
 ![alt](configs/keyboard.png) ![alt](configs/categories.png)
 
-# 操作
-运行主程序
+# operation
+run the main file
 ```
 python anno_main.py
 ```
-打开文件
+open the file
 ```
 '文件-->打开'
 ```
 ![alt](configs/Video_2020-08-01_163914.gif)
 ```
-标注实体
+label the entity
 ```
 ![alt](configs/Video_2020-08-01_165311.gif)
 
 ```
-选择性导出实体
+export the entities with BIO format
 ```
 ![alt](configs/Video_2020-08-01_170452.gif) \
-数据BIO格式显示如下：
+the example for the export dataset：
 ```
 甲 B-DRUG
 丙 I-DRUG
@@ -83,10 +83,10 @@ python anno_main.py
 
 
 
-# 更新
-在将来，我们还会继续添加实体关系标注功能。其他功能后续不断完善，请耐心等待...
+# update
 
-# 参考
+In the future, we will continue to add entity relationship annotation. Other functions continue to improve, please wait patiently
+# reference
 ```
 YEDDA: https://github.com/jiesutd/YEDDA.git
 ```

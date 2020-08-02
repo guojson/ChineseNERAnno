@@ -41,25 +41,25 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
 ![alt](configs/keyboard.png) ![alt](configs/categories.png)
 
 # operation
-run the main file
+* run the main file
 ```
 python anno_main.py
 ```
-open the file
+*open the file
 ```
 '文件-->打开'
 ```
 ![alt](configs/Video_2020-08-01_163914.gif)
 ```
-label the entity
+* label the entity
 ```
 ![alt](configs/Video_2020-08-01_165311.gif)
 
 ```
-export the entities with BIO format
+* export the entities with BIO format
 ```
 ![alt](configs/Video_2020-08-01_170452.gif) \
-the example for the export dataset：
+* the example for the export dataset：
 ```
 甲 B-DRUG
 丙 I-DRUG

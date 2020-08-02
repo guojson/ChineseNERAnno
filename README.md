@@ -45,7 +45,7 @@ Annotation tool for Chinese named entity recognition(中文命名实体标注工
 ```
 python anno_main.py
 ```
-*open the file
+* open the file
 ```
 '文件-->打开'
 ```

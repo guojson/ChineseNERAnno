@@ -91,4 +91,18 @@ In the future, we will continue to add entity relationship annotation. Other fun
 YEDDA: https://github.com/jiesutd/YEDDA.git
 ```
 # Cited
-updated later
+```
+@article{GUO2020105830,
+title = "Chinese agricultural diseases and pests named entity recognition with multi-scale local context features and self-attention mechanism",
+journal = "Computers and Electronics in Agriculture",
+volume = "179",
+pages = "105830",
+year = "2020",
+issn = "0168-1699",
+doi = "https://doi.org/10.1016/j.compag.2020.105830",
+url = "http://www.sciencedirect.com/science/article/pii/S0168169920321207",
+author = "Xuchao Guo and Han Zhou and Jie Su and Xia Hao and Zhan Tang and Lei Diao and Lin Li",
+keywords = "Chinese agricultural diseases and pests named entity recognition, Corpus, Multi-scale local context features, Convolutional neural networks, Self-attention mechanism",
+abstract = "Chinese named entity recognition is a crucial initial step of information extraction in the field of agricultural diseases and pests. This step aims to identify named entities related to agricultural diseases and pests from unstructured texts but presents challenges. The available corpus in this domain is limited, and most existing named entity recognition methods only focus on the global context information but neglect potential local context features, which are also equally important for named entity recognition. To solve the above problems and tackle the named entity recognition task in this paper, an available corpus toward agricultural diseases and pests, namely AgCNER, which contains 11 categories and 34,952 samples, was established. Compared with the corpora in the same field, this corpus has additional categories and more sample sizes. Then, a novel Chinese named entity recognition model via joint multi-scale local context features and the self-attention mechanism was proposed. The original Bi-directional Long Short-Term Memory and Conditional Random Field model (BiLSTM-CRF) was improved by fusing the multi-scale local context features extracted by Convolutional Neural Network (CNN) with different kernel sizes. The self-attention mechanism was also used to break the limitation of BiLSTM-CRF in capturing long-distance dependencies and further improve the model performance. The performance of the proposed model was evaluated on three corpora, namely AgCNER, Resume, and MSRA, which achieved the optimal F1-values of 94.15%, 94.56%, and 90.55%, respectively. Experimental results in many aspects illustrated the effective performance of the proposed model in this paper."
+}
+```
